@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Herexamen and</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Invites</string>
+    <string name="title_notifications">New Invite</string>
+    <string name="select_start_time">Select a start time</string>
+    <string name="select_end_time">Select an end time</string>
+    <string name="select_a_date">Select a date</string>
+    <string name="name">Name</string>
+    <string name="create">Create</string>
+</resources>
