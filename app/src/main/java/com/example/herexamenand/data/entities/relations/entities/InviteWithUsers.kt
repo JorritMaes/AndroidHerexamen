@@ -7,11 +7,11 @@ import com.example.herexamenand.data.entities.Invite
 import com.example.herexamenand.data.entities.User
 import com.example.herexamenand.data.entities.relations.tables.UserInviteCrossRef
 
-data class UserWithInvites(
-    @Embedded val user : User,
+data class InviteWithUsers(
+    @Embedded val invite: Invite,
     @Relation(
         parentColumn = "userId",
         entityColumn = "userId",
-        associateBy = Junction(UserInviteCrossRef::class),
-    ) val invites: List<Invite>,
-) {}
+        associateBy = Junction(UserInviteCrossRef::class)
+    ) val users: List<User>
+)

@@ -87,7 +87,7 @@ class NotificationsFragment : Fragment() {
             selectDateButton.text.toString(),
             selectStartTime.text.toString().plus(" - ").plus(selectEndTime.text.toString()),
             inputName.text.toString(),
-            0
+            1
         )
 
         val inviteDao = MyApplication.database.InviteDao()
@@ -114,7 +114,7 @@ class NotificationsFragment : Fragment() {
             calendar.set(Calendar.MINUTE, minute)
 
             // Format the selected time and display it
-            val timeFormat = SimpleDateFormat("HH:mm a", Locale.getDefault())
+            val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
             val selectedTime = timeFormat.format(calendar.time)
             selector.text = selectedTime
         }

@@ -5,14 +5,13 @@ import androidx.room.Junction
 import androidx.room.Relation
 import com.example.herexamenand.data.entities.Attendee
 import com.example.herexamenand.data.entities.Event
-import com.example.herexamenand.data.entities.relations.tables.EventAttendeeCrossRef
+import com.example.herexamenand.data.entities.relations.tables.EventAttendeesCrossRef
 
 data class EventWithAttendees(
     @Embedded val event: Event,
     @Relation(
         parentColumn = "eventId",
-        entityColumn = "attendeeId",
-        associateBy = Junction(EventAttendeeCrossRef::class),
+        entityColumn = "eventId",
     ) val attendeeList: List<Attendee>
 
 )
