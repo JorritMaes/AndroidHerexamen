@@ -7,7 +7,7 @@ import com.example.herexamenand.data.daos.UserDao
 import com.example.herexamenand.data.entities.Invite
 import com.example.herexamenand.data.entities.User
 
-@Database(entities = [User::class, Invite::class], version=6)
+@Database(entities = [User::class, Invite::class], version=7)
 abstract class Database : RoomDatabase() {
     abstract fun UserDao(): UserDao
     abstract fun InviteDao(): InviteDao

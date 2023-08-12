@@ -16,6 +16,7 @@ class MyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         database = Room.databaseBuilder(applicationContext, Database::class.java, "herexamen_db")
+            .fallbackToDestructiveMigration()
             .build()
         GlobalScope.launch(Dispatchers.IO) {
             database.UserDao().insert(User(0, "testuser"))
