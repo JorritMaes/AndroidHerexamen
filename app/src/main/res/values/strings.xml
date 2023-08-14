@@ -3,10 +3,15 @@
     <string name="title_home">Home</string>
     <string name="title_dashboard">Invites</string>
     <string name="title_notifications">New Invite</string>
+    <string name="title_add_friend">Add Friend</string>
     <string name="select_start_time">Select a start time</string>
     <string name="select_end_time">Select an end time</string>
     <string name="select_a_date">Select a date</string>
     <string name="name">Name</string>
     <string name="create">Create</string>
     <string name="accept">Accept</string>
+    <string name="friend_list">Friend list</string>
+    <string name="Invite">Invite</string>
+    <string name="remove">Remove</string>
+    <string name="user_does_not_exist">Sorry this user does not exist</string>
 </resources>

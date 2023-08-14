@@ -21,5 +21,14 @@
         android:id="@+id/navigation_notifications"
         android:name="com.example.herexamenand.ui.notifications.NotificationsFragment"
         android:label="@string/title_notifications"
-        tools:layout="@layout/fragment_notifications" />
+        tools:layout="@layout/fragment_notifications" >
+        <action
+            android:id="@+id/action_navigation_notifications_to_navigation_new_friend"
+            app:destination="@id/navigation_new_friend" />
+    </fragment>
+    <fragment
+        android:id="@+id/navigation_new_friend"
+        android:name="com.example.herexamenand.ui.friend.FriendFragment"
+        android:label="@string/title_add_friend"
+        tools:layout="@layout/fragment_new_friend" />
 </navigation>

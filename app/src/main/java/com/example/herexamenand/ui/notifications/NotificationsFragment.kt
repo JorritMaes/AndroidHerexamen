@@ -3,20 +3,20 @@ package com.example.herexamenand.ui.notifications
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.os.Bundle
-import android.text.Editable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
-import androidx.core.text.set
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.example.herexamenand.MainActivity
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.NavHostFragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.herexamenand.MyApplication
 import com.example.herexamenand.R
 import com.example.herexamenand.data.entities.Invite
-import com.example.herexamenand.data.entities.User
 import com.example.herexamenand.databinding.FragmentNotificationsBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -31,6 +31,8 @@ class NotificationsFragment : Fragment() {
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
+    private lateinit var adapter: FriendItemAdapter
+
 
     private lateinit var selectDateButton: Button
     private val calendar = Calendar.getInstance()
@@ -40,8 +42,9 @@ class NotificationsFragment : Fragment() {
     private lateinit var createInvite: Button
 
     private lateinit var inputName: EditText
-    private lateinit var input_host: EditText
     private val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+
+    private lateinit var add_friend_button: Button
 
 
 
@@ -69,7 +72,6 @@ class NotificationsFragment : Fragment() {
         selectEndTime.setOnClickListener {
             onTimePickerClick(selectEndTime)
         }
-
         createInvite = root.findViewById(R.id.button_create_event)
         createInvite.setOnClickListener {
             createInvite()
@@ -77,8 +79,31 @@ class NotificationsFragment : Fragment() {
 
         inputName = root.findViewById(R.id.edit_text_event_name)
 
+        add_friend_button = root.findViewById(R.id.button_go_to_add_friend)
+        add_friend_button.setOnClickListener {
+            NavHostFragment.findNavController(this).navigate(R.id.action_navigation_notifications_to_navigation_new_friend)
+        }
 
         return root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        adapter= FriendItemAdapter(emptyList())
+        val friendOverview : RecyclerView = view.findViewById(R.id.friend_overview)
+        friendOverview.layoutManager = LinearLayoutManager(requireContext())
+        friendOverview.adapter = adapter
+
+        fetchFriends()
+    }
+
+    private fun fetchFriends() {
+        viewLifecycleOwner.lifecycleScope.launch{
+            val user = MyApplication.database.UserDao().getFriends(1)
+            adapter.setNewList(user.friendList)
+
+        }
     }
 
     private fun createInvite() {
@@ -148,4 +173,6 @@ class NotificationsFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+
+
 }
