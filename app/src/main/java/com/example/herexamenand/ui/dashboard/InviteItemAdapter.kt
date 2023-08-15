@@ -53,7 +53,7 @@ class InviteItemAdapter(private var inviteList: List<Invite>) :
     fun createEvent(currentInvite: Invite, position: Int){
         GlobalScope.launch(Dispatchers.Main){
             val eventId = eventDao.insert(Event(0,currentInvite.date,currentInvite.times, currentInvite.name, currentInvite.userId))
-            attendeeDao.insert(Attendee(0,user.userId, eventId, Presence.PENDING))
+            attendeeDao.insert(Attendee(0,user.userId, eventId, Presence.CONFIRMED))
             inviteDao.remove(currentInvite)
 
         }

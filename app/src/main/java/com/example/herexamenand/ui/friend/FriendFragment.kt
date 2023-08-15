@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.herexamenand.MyApiManager
 import com.example.herexamenand.MyApplication
 import com.example.herexamenand.R
 import com.example.herexamenand.data.entities.User
@@ -34,6 +35,8 @@ class FriendFragment: Fragment()  {
 
     private val userDao = MyApplication.database.UserDao()
     private val friendsCrossRefDao = MyApplication.database.FriendsCrossRefDao()
+    private lateinit var apiManager: MyApiManager
+
 
 
     override fun onCreateView(
@@ -41,6 +44,7 @@ class FriendFragment: Fragment()  {
        container: ViewGroup?,
        savedInstanceState: Bundle?
     ): View {
+        apiManager = MyApiManager(requireContext())
 
         _binding = FragmentNewFriendBinding.inflate(inflater, container, false)
         val root = binding.root
@@ -57,6 +61,9 @@ class FriendFragment: Fragment()  {
                     GlobalScope.launch(Dispatchers.IO){
                         friendsCrossRefDao.insert(FriendsCrossRef(friend.userId, 1))
                         friendsCrossRefDao.insert(FriendsCrossRef(1, friend.userId))
+                        apiManager.makeApiPostUserCall(MyApplication.currentUser)
+                        // get him agan now with new friendlist
+                        apiManager.makeApiPostUserCall(MyApplication.database.UserDao().find(friend.userId))
                         fetchFriends()
                     }
                     noUserMessage.isVisible = false

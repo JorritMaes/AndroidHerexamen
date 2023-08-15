@@ -1,16 +1,14 @@
 package com.example.herexamenand.data.daos
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.Query
-import androidx.room.Transaction
+import androidx.room.*
 import com.example.herexamenand.data.entities.User
 import com.example.herexamenand.data.entities.relations.entities.UserWithFriends
 
 @Dao
 interface UserDao {
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(entity: User)
+
 
     @Query("SELECT * FROM users WHERE userId = :userId")
     suspend fun find(userId: Long): User

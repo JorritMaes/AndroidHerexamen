@@ -14,9 +14,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.android.volley.Request
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
 import com.example.herexamenand.MyApplication
 import com.example.herexamenand.R
 import com.example.herexamenand.data.entities.Invite
+import com.example.herexamenand.data.entities.User
 import com.example.herexamenand.databinding.FragmentNotificationsBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -44,16 +48,14 @@ class NotificationsFragment : Fragment() {
     private lateinit var inputName: EditText
     private val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
 
-    private lateinit var add_friend_button: Button
-
-
+    private lateinit var notificationsViewModel: NotificationsViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val notificationsViewModel =
+        notificationsViewModel =
             ViewModelProvider(this).get(NotificationsViewModel::class.java)
 
         _binding = FragmentNotificationsBinding.inflate(inflater, container, false)
@@ -79,10 +81,6 @@ class NotificationsFragment : Fragment() {
 
         inputName = root.findViewById(R.id.edit_text_event_name)
 
-        add_friend_button = root.findViewById(R.id.button_go_to_add_friend)
-        add_friend_button.setOnClickListener {
-            NavHostFragment.findNavController(this).navigate(R.id.action_navigation_notifications_to_navigation_new_friend)
-        }
 
         return root
     }
@@ -90,7 +88,7 @@ class NotificationsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter= FriendItemAdapter(emptyList())
+        adapter= FriendItemAdapter(emptyList(), notificationsViewModel.invitedFriends)
         val friendOverview : RecyclerView = view.findViewById(R.id.friend_overview)
         friendOverview.layoutManager = LinearLayoutManager(requireContext())
         friendOverview.adapter = adapter
@@ -107,19 +105,22 @@ class NotificationsFragment : Fragment() {
     }
 
     private fun createInvite() {
-        val invite : Invite = Invite(
-            0,
-            selectDateButton.text.toString(),
-            selectStartTime.text.toString().plus(" - ").plus(selectEndTime.text.toString()),
-            inputName.text.toString(),
-            1
-        )
+        notificationsViewModel.invitedFriends.value?.forEach {
+            GlobalScope.launch(Dispatchers.IO) {
+                val invite : Invite = Invite(
+                    0,
+                    selectDateButton.text.toString(),
+                    selectStartTime.text.toString().plus(" - ").plus(selectEndTime.text.toString()),
+                    inputName.text.toString(),
+                    it.userId
+                )
 
-        val inviteDao = MyApplication.database.InviteDao()
-        GlobalScope.launch(Dispatchers.IO) {
-            inviteDao.insert(invite)
+                val inviteDao = MyApplication.database.InviteDao()
+                inviteDao.insert(invite)
 
+            }
         }
+
 
         clearInputs()
 

@@ -4,12 +4,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.EditText
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.herexamenand.MyApiManager
 import com.example.herexamenand.MyApplication
 import com.example.herexamenand.R
-import com.example.herexamenand.data.daos.FriendsCrossRefDao
 import com.example.herexamenand.data.entities.User
 import com.example.herexamenand.data.entities.relations.tables.FriendsCrossRef
 import kotlinx.coroutines.Dispatchers
@@ -20,9 +19,12 @@ class FriendManageItemAdapter(private var userList: List<User>) :
     RecyclerView.Adapter<FriendManageItemAdapter.ViewHolder>() {
     private val userDao = MyApplication.database.UserDao()
     private val friendsCrossRefDao = MyApplication.database.FriendsCrossRefDao()
+    private lateinit var apiManager: MyApiManager
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.base_friend_list_item, parent, false)
+
+        apiManager = MyApiManager(parent.context)
 
         return ViewHolder(view)
     }
@@ -35,12 +37,14 @@ class FriendManageItemAdapter(private var userList: List<User>) :
             userList = userList.filter { e -> e.userId != currentItem.userId  }
             notifyItemRemoved(position)
         }
+
     }
 
     private fun removeFriend(userId: Long) {
         GlobalScope.launch(Dispatchers.IO){
             friendsCrossRefDao.delete(FriendsCrossRef(userId,1))
             friendsCrossRefDao.delete(FriendsCrossRef(1,userId))
+            apiManager.makeApiPostUserCall(MyApplication.currentUser)
         }
     }
 
