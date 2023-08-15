@@ -7,6 +7,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.herexamenand.MyApplication
 import com.example.herexamenand.R
+import com.example.herexamenand.data.entities.Attendee
 import com.example.herexamenand.data.entities.relations.entities.EventWithAttendees
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -16,10 +17,12 @@ class EventItemAdapter(private var eventList: List<EventWithAttendees>) :
     RecyclerView.Adapter<EventItemAdapter.ViewHolder>() {
     private val userDao = MyApplication.database.UserDao()
     private val attendeeDao = MyApplication.database.AttendeeDao()
+    private lateinit var attendeeString: String
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.event_list_item, parent, false)
 
+        attendeeString = parent.context.getString(R.string.attendees)
         return ViewHolder(view)
     }
 
@@ -33,7 +36,7 @@ class EventItemAdapter(private var eventList: List<EventWithAttendees>) :
         holder.name.text = currentItem.event.name
         holder.date.text = currentItem.event.date
         holder.times.text = currentItem.event.times
-        holder.attendeeCount.text = currentItem.attendeeList.size.toString().plus(" attendees")
+        holder.attendeeCount.text = currentItem.attendeeList.size.toString().plus(" ").plus(attendeeString)
 
 
     }

@@ -19,7 +19,7 @@ import com.example.herexamenand.data.entities.relations.tables.UserInviteCrossRe
     UserInviteCrossRef::class,
     FriendsCrossRef::class
                ],
-    version=1)
+    version=12)
 abstract class Database : RoomDatabase() {
     abstract fun UserDao(): UserDao
     abstract fun InviteDao(): InviteDao

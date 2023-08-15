@@ -7,9 +7,9 @@ import org.json.JSONObject
 
 @Entity(tableName = "users")
 data class User(
-    @PrimaryKey(autoGenerate = true) var userId: Long,
+    @PrimaryKey var userId: Long,
     var username: String) {
-    fun toJsonObject(userWithFriends: UserWithFriends): JSONObject? {
+    fun toJsonObject(userWithFriends: UserWithFriends): JSONObject {
         var friendList = "["
         userWithFriends.friendList.forEach { e -> friendList =  friendList.plus("{\"username\": \"${e.username}\", \"id\": \"${e.userId}\"},") }
         friendList = friendList.plus("]")

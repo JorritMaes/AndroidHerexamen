@@ -16,6 +16,33 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/edit_date_event_date" />
 
+    <TextView
+        android:id="@+id/text_view_invalid_date_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/invalid_date"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="@+id/edit_date_event_date"
+        app:layout_constraintTop_toBottomOf="@+id/edit_date_event_date" />
+
+    <TextView
+        android:id="@+id/text_view_invalid_start_time_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/invalid_time"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="@+id/button_event_time_start"
+        app:layout_constraintTop_toBottomOf="@+id/button_event_time_start" />
+
+    <TextView
+        android:id="@+id/text_view_invalid_end_time_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/invalid_time"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="@+id/button_event_time_end"
+        app:layout_constraintTop_toBottomOf="@+id/button_event_time_end" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/friend_overview"
         android:layout_width="0dp"

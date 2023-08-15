@@ -16,7 +16,7 @@ import com.android.volley.toolbox.Volley
 import com.example.herexamenand.R
 import com.example.herexamenand.data.entities.User
 
-class FriendItemAdapter(private var friendList: List<User>, private var invitedUsersList: MutableLiveData<ArrayList<User>>) :
+class FriendItemAdapter( var friendList: List<User>, private var invitedUsersList: MutableLiveData<ArrayList<User>>) :
     RecyclerView.Adapter<FriendItemAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FriendItemAdapter.ViewHolder {
@@ -29,6 +29,7 @@ class FriendItemAdapter(private var friendList: List<User>, private var invitedU
         val currentItem = friendList[position]
 
         holder.friendName.text = currentItem.username
+        holder.invited.isChecked = false
 
         holder.invited.setOnClickListener{
             if (holder.invited.isChecked){
@@ -53,6 +54,7 @@ class FriendItemAdapter(private var friendList: List<User>, private var invitedU
 
     fun setNewList(newList: List<User>){
         friendList = newList
+        this.
         notifyDataSetChanged()
     }
 

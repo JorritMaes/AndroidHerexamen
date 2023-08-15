@@ -17,4 +17,7 @@
     <string name="user_does_not_exist">Sorry deze gebruiker bestaat niet</string>
     <string name="username">Gebruikersnaam</string>
     <string name="friends">Vrienden</string>
+    <string name="attendees">deelnemers</string>
+    <string name="invalid_date">Foutieve datum</string>
+    <string name="invalid_time">Foutieve Tijd</string>
 </resources>

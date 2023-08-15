@@ -56,6 +56,7 @@ class InviteItemAdapter(private var inviteList: List<Invite>) :
             attendeeDao.insert(Attendee(0,user.userId, eventId, Presence.CONFIRMED))
             inviteDao.remove(currentInvite)
 
+
         }
     }
 

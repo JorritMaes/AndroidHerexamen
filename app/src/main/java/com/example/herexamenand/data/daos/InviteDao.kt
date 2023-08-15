@@ -6,7 +6,7 @@ import com.example.herexamenand.data.entities.Invite
 @Dao
 interface InviteDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(entity: Invite)
+    suspend fun insert(entity: Invite): Long
 
     @Query("SELECT * FROM invites")
     suspend fun getAllEntities():List<Invite>

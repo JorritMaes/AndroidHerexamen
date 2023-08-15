@@ -3,11 +3,14 @@ package com.example.herexamenand.ui.notifications
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.os.Bundle
+import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -17,10 +20,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.android.volley.Request
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.example.herexamenand.MyApiManager
 import com.example.herexamenand.MyApplication
 import com.example.herexamenand.R
-import com.example.herexamenand.data.entities.Invite
-import com.example.herexamenand.data.entities.User
+import com.example.herexamenand.data.entities.*
 import com.example.herexamenand.databinding.FragmentNotificationsBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -47,8 +50,12 @@ class NotificationsFragment : Fragment() {
 
     private lateinit var inputName: EditText
     private val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+    private lateinit var invalidDate: TextView
+    private lateinit var invalidStartTime: TextView
+    private lateinit var invalidEndTime: TextView
 
     private lateinit var notificationsViewModel: NotificationsViewModel
+    private lateinit var apiManager: MyApiManager
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -60,6 +67,8 @@ class NotificationsFragment : Fragment() {
 
         _binding = FragmentNotificationsBinding.inflate(inflater, container, false)
         val root: View = binding.root
+
+        apiManager = MyApiManager(requireContext())
 
         selectDateButton = root.findViewById(R.id.edit_date_event_date)
         selectDateButton.setOnClickListener{
@@ -78,6 +87,10 @@ class NotificationsFragment : Fragment() {
         createInvite.setOnClickListener {
             createInvite()
         }
+
+        invalidDate = root.findViewById(R.id.text_view_invalid_date_message)
+        invalidStartTime = root.findViewById(R.id.text_view_invalid_start_time_message)
+        invalidEndTime = root.findViewById(R.id.text_view_invalid_end_time_message)
 
         inputName = root.findViewById(R.id.edit_text_event_name)
 
@@ -105,8 +118,9 @@ class NotificationsFragment : Fragment() {
     }
 
     private fun createInvite() {
-        notificationsViewModel.invitedFriends.value?.forEach {
-            GlobalScope.launch(Dispatchers.IO) {
+        GlobalScope.launch(Dispatchers.IO){
+            // For each invited friend create an invite
+            notificationsViewModel.invitedFriends.value?.forEach {
                 val invite : Invite = Invite(
                     0,
                     selectDateButton.text.toString(),
@@ -115,22 +129,41 @@ class NotificationsFragment : Fragment() {
                     it.userId
                 )
 
-                val inviteDao = MyApplication.database.InviteDao()
-                inviteDao.insert(invite)
+                MyApplication.database.InviteDao().insert(invite)
+                apiManager.makeApiPostInviteCall(invite)
 
             }
+
+            //Create an event and attendee for the current user
+            val event : Event = Event(
+                0,
+                selectDateButton.text.toString(),
+                selectStartTime.text.toString().plus(" - ").plus(selectEndTime.text.toString()),
+                inputName.text.toString(),
+                MyApplication.currentUser.userId
+            )
+            val eventId = apiManager.makeApiPostEventCall(event)
+            event.eventId = eventId
+            MyApplication.database.EventDao().insert(event)
+
+            val attendee = Attendee(0, MyApplication.currentUser.userId, eventId, Presence.CONFIRMED)
+            attendee.attendeeId = apiManager.makeApiPostAttendeeCall(attendee)
+            MyApplication.database.AttendeeDao().insert(attendee)
+
+            clearInputs()
         }
-
-
-        clearInputs()
 
     }
 
     private fun clearInputs() {
-        selectDateButton.text = ""
-        selectStartTime.text = ""
-        selectEndTime.text = ""
-        inputName.text.clear()
+        GlobalScope.launch(Dispatchers.Main){
+            selectDateButton.text = ""
+            selectStartTime.text = ""
+            selectEndTime.text = ""
+            inputName.text.clear()
+            //clear the checkboxes by reloading
+            adapter.notifyDataSetChanged()
+        }
     }
 
     private fun onTimePickerClick(selector: Button) {
@@ -142,7 +175,11 @@ class NotificationsFragment : Fragment() {
             // Format the selected time and display it
             val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
             val selectedTime = timeFormat.format(calendar.time)
-            selector.text = selectedTime
+            selector.text = selectedTime.toString()
+
+            //Check if the start time comes after the end time
+            checkTimes(selector, timeFormat)
+
         }
 
         val initialHour = calendar.get(Calendar.HOUR_OF_DAY)
@@ -159,7 +196,15 @@ class NotificationsFragment : Fragment() {
             calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
 
             val selectedDate = dateFormat.format(calendar.time)
-            selectDateButton.text = selectedDate
+            if (!calendar.time.before(Calendar.getInstance().time)){
+                selectDateButton.text = selectedDate
+                invalidDate.isVisible = false
+
+            }
+            else{
+                invalidDate.isVisible = true
+            }
+
         }
 
         val initialYear = calendar.get(Calendar.YEAR)
@@ -175,5 +220,27 @@ class NotificationsFragment : Fragment() {
         _binding = null
     }
 
+    fun checkTimes(timeselector: Button, timeFormat: SimpleDateFormat){
+        if(timeselector.id == R.id.button_event_time_end && selectStartTime.text.toString().isNotBlank()) {
+            if(timeFormat.parse(selectStartTime.text.toString())?.before(timeFormat.parse(timeselector.text.toString())) == false) {
+                timeselector.text = " "
+                invalidEndTime.isVisible = true
+            }
+            else {
+                invalidEndTime.isVisible = false
+            }
+        }
+        else if(timeselector.id == R.id.button_event_time_start && selectEndTime.text.toString().isNotBlank()) {
+            if (timeFormat.parse(selectEndTime.text.toString())?.after(timeFormat.parse(timeselector.text.toString())) == false){
+                timeselector.text = " "
+                invalidStartTime.isVisible = true
+            }
+            else{
+                invalidStartTime.isVisible = false
+
+            }
+        }
+
+    }
 
 }
