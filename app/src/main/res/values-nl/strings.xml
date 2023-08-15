@@ -9,11 +9,12 @@
     <string name="select_end_time">Selecteer een eind tijd</string>
     <string name="select_a_date">Selecteer een datum</string>
     <string name="name">Naam</string>
-    <string name="create_event">Event Aanmaken</string>
+    <string name="create_invites">Uitnodigingen Aanmaken</string>
     <string name="accept">Accepteren</string>
     <string name="friend_list">Vriendenlijst</string>
     <string name="Invite">Uitnodiging</string>
     <string name="remove">Verwijder</string>
     <string name="user_does_not_exist">Sorry deze gebruiker bestaat niet</string>
     <string name="username">Gebruikersnaam</string>
+    <string name="friends">Vrienden</string>
 </resources>

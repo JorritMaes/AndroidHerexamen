@@ -8,11 +8,12 @@
     <string name="select_end_time">Select an end time</string>
     <string name="select_a_date">Select a date</string>
     <string name="name">Name</string>
-    <string name="create_event">Create event</string>
+    <string name="create_invites">Create invites</string>
     <string name="accept">Accept</string>
     <string name="friend_list">Friend list</string>
     <string name="Invite">Invite</string>
     <string name="remove">Remove</string>
     <string name="user_does_not_exist">Sorry this user does not exist</string>
     <string name="username">username</string>
+    <string name="friends">Friends</string>
 </resources>

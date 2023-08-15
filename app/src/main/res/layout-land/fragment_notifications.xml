@@ -12,8 +12,8 @@
         android:layout_height="48dp"
         android:layout_marginTop="24dp"
         android:layout_marginEnd="16dp"
-        android:text="@string/create_event"
-        app:layout_constraintEnd_toStartOf="@+id/button_go_to_add_friend"
+        android:text="@string/create_invites"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/edit_date_event_date" />
 
     <androidx.recyclerview.widget.RecyclerView
@@ -110,15 +110,6 @@
         android:text="@string/friend_list"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/button_create_event" />
-
-    <Button
-        android:id="@+id/button_go_to_add_friend"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:text="@string/title_add_friend"
-        app:layout_constraintBaseline_toBaselineOf="@+id/button_create_event"
-        app:layout_constraintEnd_toEndOf="parent" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
