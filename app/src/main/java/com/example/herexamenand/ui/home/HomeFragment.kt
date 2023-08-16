@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CalendarView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -11,8 +12,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.herexamenand.MyApplication
 import com.example.herexamenand.R
+import com.example.herexamenand.data.entities.relations.entities.AttendeeWithUserAndEvent
 import com.example.herexamenand.databinding.FragmentHomeBinding
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import java.text.SimpleDateFormat
+import java.util.*
 
 class HomeFragment : Fragment() {
 
@@ -22,6 +26,8 @@ class HomeFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
     private lateinit var adapter: EventItemAdapter
+    private lateinit var calendarView: CalendarView
+    private var eventList = emptyList<AttendeeWithUserAndEvent>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -32,7 +38,11 @@ class HomeFragment : Fragment() {
             ViewModelProvider(this).get(HomeViewModel::class.java)
 
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
-        return binding.root
+        val root: View = binding.root
+
+        calendarView = root.findViewById(R.id.calendar_view)
+
+        return root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -42,15 +52,31 @@ class HomeFragment : Fragment() {
         eventOverview.layoutManager = LinearLayoutManager(requireContext())
         eventOverview.adapter = adapter
 
-        fetchAllEvents()
+        GlobalScope.launch(Dispatchers.IO){
+            val allAttendees = MyApplication.database.AttendeeDao().getAllEntities()
+            while (eventList.isEmpty()){
+                eventList = MyApplication.database.AttendeeDao().getMyAttendeesWithEventAndUser(MyApplication.currentUser.userId)
+            }
+            setEventList(calendarView.date)
+        }
 
+        calendarView.setOnDateChangeListener { view, year, month, dayOfMonth ->
+            GlobalScope.launch(Dispatchers.IO){
+                val tempCalendar = Calendar.getInstance()
+                tempCalendar.set(year, month, dayOfMonth)
+                view.date = tempCalendar.timeInMillis
+                setEventList(view.date)
+            }
+        }
+
+
+        parentFragmentManager.beginTransaction().detach(this).attach(this)
     }
 
-
-    private fun fetchAllEvents() {
+    private fun setEventList(date: Long) {
         viewLifecycleOwner.lifecycleScope.launch{
-            val allAttendeesList= MyApplication.database.AttendeeDao().getMyAttendeesWithEventAndUser(MyApplication.currentUser.userId)
-            adapter.setNewList(allAttendeesList)
+            val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+            adapter.setNewList(eventList.filter { e -> e.event.date == dateFormat.format(date) })
         }
     }
 

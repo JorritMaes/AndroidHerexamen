@@ -17,12 +17,14 @@ interface EventDao {
 
     @Transaction
     @Query("SELECT * FROM events")
-    suspend fun getAllEntities(): List<EventWithAttendees>
+    suspend fun getAllEntities(): List<Event>
 
     @Transaction
     @Query("SELECT * FROM events WHERE eventId = :eventId")
     suspend fun findEventWithAttendees(eventId: Long): EventWithAttendees
 
+    @Delete
+    suspend fun remove(event: Event)
 //    @Transaction
 //    @Query("SELECT * FROM events JOIN attendees ON attendees.userId = :userId  WHERE ")
 //    suspend fun getMyEvents(userId: Long): List<EventWithAttendees>

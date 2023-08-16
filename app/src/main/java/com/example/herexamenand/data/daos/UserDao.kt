@@ -1,6 +1,7 @@
 package com.example.herexamenand.data.daos
 
 import androidx.room.*
+import com.example.herexamenand.data.entities.Invite
 import com.example.herexamenand.data.entities.User
 import com.example.herexamenand.data.entities.relations.entities.UserWithFriends
 
@@ -9,6 +10,8 @@ interface UserDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(entity: User)
 
+    @Delete
+    suspend fun remove(user: User)
 
     @Query("SELECT * FROM users WHERE userId = :userId")
     suspend fun find(userId: Long): User
