@@ -119,21 +119,6 @@ class NotificationsFragment : Fragment() {
 
     private fun createInvite() {
         GlobalScope.launch(Dispatchers.IO){
-            // For each invited friend create an invite
-            notificationsViewModel.invitedFriends.value?.forEach {
-                val invite : Invite = Invite(
-                    0,
-                    selectDateButton.text.toString(),
-                    selectStartTime.text.toString().plus(" - ").plus(selectEndTime.text.toString()),
-                    inputName.text.toString(),
-                    it.userId
-                )
-
-                MyApplication.database.InviteDao().insert(invite)
-                apiManager.makeApiPostInviteCall(invite)
-
-            }
-
             //Create an event and attendee for the current user
             val event : Event = Event(
                 0,
@@ -149,6 +134,22 @@ class NotificationsFragment : Fragment() {
             val attendee = Attendee(0, MyApplication.currentUser.userId, eventId, Presence.CONFIRMED)
             attendee.attendeeId = apiManager.makeApiPostAttendeeCall(attendee)
             MyApplication.database.AttendeeDao().insert(attendee)
+
+            // For each invited friend create an invite
+            notificationsViewModel.invitedFriends.value?.forEach {
+                val invite : Invite = Invite(
+                    0,
+                    selectDateButton.text.toString(),
+                    selectStartTime.text.toString().plus(" - ").plus(selectEndTime.text.toString()),
+                    inputName.text.toString(),
+                    it.userId,
+                    eventId
+                    )
+
+                MyApplication.database.InviteDao().insert(invite)
+                apiManager.makeApiPostInviteCall(invite)
+
+            }
 
             clearInputs()
         }

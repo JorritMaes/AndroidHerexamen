@@ -5,6 +5,7 @@ import com.example.herexamenand.data.entities.Event
 import com.example.herexamenand.data.entities.Invite
 import com.example.herexamenand.data.entities.User
 import com.example.herexamenand.data.entities.relations.entities.EventWithAttendees
+import com.example.herexamenand.data.entities.relations.entities.EventWithHost
 
 @Dao
 interface EventDao {
@@ -17,4 +18,12 @@ interface EventDao {
     @Transaction
     @Query("SELECT * FROM events")
     suspend fun getAllEntities(): List<EventWithAttendees>
+
+    @Transaction
+    @Query("SELECT * FROM events WHERE eventId = :eventId")
+    suspend fun findEventWithAttendees(eventId: Long): EventWithAttendees
+
+//    @Transaction
+//    @Query("SELECT * FROM events JOIN attendees ON attendees.userId = :userId  WHERE ")
+//    suspend fun getMyEvents(userId: Long): List<EventWithAttendees>
 }

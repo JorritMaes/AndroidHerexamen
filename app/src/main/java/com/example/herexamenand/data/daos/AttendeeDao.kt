@@ -5,6 +5,8 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.example.herexamenand.data.entities.Attendee
+import com.example.herexamenand.data.entities.relations.entities.AttendeeWithUserAndEvent
+import com.example.herexamenand.data.entities.relations.entities.EventWithAttendees
 
 @Dao
 interface AttendeeDao {
@@ -16,4 +18,7 @@ interface AttendeeDao {
 
     @Query("SELECT * FROM attendees")
     suspend fun getAllEntities(): List<Attendee>
+
+    @Query("SELECT * FROM attendees WHERE userId = :userId")
+    suspend fun getMyAttendeesWithEventAndUser(userId: Long): List<AttendeeWithUserAndEvent>
 }

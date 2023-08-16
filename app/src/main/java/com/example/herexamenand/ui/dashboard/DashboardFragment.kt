@@ -57,9 +57,11 @@ class DashboardFragment : Fragment() {
     }
 
     private fun fetchAllInvites() {
-        viewLifecycleOwner.lifecycleScope.launch{
-            val allInvitesList= MyApplication.database.InviteDao().getAllEntities()
-            adapter.setNewList(allInvitesList)
+       GlobalScope.launch(Dispatchers.IO){
+            val allInvitesList= MyApplication.database.InviteDao().getAllInvitesOfUser(MyApplication.currentUser.userId)
+           viewLifecycleOwner.lifecycleScope.launch{
+               adapter.setNewList(allInvitesList)
+           }
         }
     }
 

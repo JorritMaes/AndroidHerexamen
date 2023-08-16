@@ -16,7 +16,6 @@ class MyApiManager(val context: Context) {
 
     suspend fun makeAPIGetCall(urlSuffix: String){
         GlobalScope.launch(Dispatchers.IO) {
-            var res: String = " "
             val queue = Volley.newRequestQueue(context)
             val url = "http://192.168.11.55:8080/${urlSuffix}"
 
@@ -82,7 +81,8 @@ class MyApiManager(val context: Context) {
     suspend fun makeApiPostInviteCall(invite: Invite): Long {
         return withContext(Dispatchers.IO) {
             val userWithFriends = MyApplication.database.UserDao().getFriends(invite.userId)
-            val jsonObject = invite.toJsonObject(userWithFriends)
+            val event = MyApplication.database.EventDao().find(invite.eventId)
+            val jsonObject = invite.toJsonObject(userWithFriends, event)
 
             val deferredId = CompletableDeferred<Long>()
             var res: String = " "
@@ -148,6 +148,21 @@ class MyApiManager(val context: Context) {
 
             queue.add(stringRequest)
             deferredId.await()
+        }
+    }
+
+    fun makeApiDeleteInviteCall(invite: Invite){
+        GlobalScope.launch(Dispatchers.IO) {
+
+            val queue = Volley.newRequestQueue(context)
+            val url = "http://192.168.11.55:8080/invite/${invite.inviteId}"
+
+            val stringRequest = JsonObjectRequest(
+                Request.Method.DELETE, url, null,
+                {},
+                {})
+
+            queue.add(stringRequest)
         }
     }
 }

@@ -14,4 +14,7 @@ interface InviteDao {
     @Delete
     suspend fun remove(invite: Invite)
 
+    @Query("SELECT * FROM invites WHERE userId = :userId")
+    fun getAllInvitesOfUser(userId: Long): List<Invite>
+
 }

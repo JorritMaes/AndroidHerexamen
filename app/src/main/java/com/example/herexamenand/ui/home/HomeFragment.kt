@@ -49,8 +49,8 @@ class HomeFragment : Fragment() {
 
     private fun fetchAllEvents() {
         viewLifecycleOwner.lifecycleScope.launch{
-            val allEventsList= MyApplication.database.EventDao().getAllEntities()
-            adapter.setNewList(allEventsList)
+            val allAttendeesList= MyApplication.database.AttendeeDao().getMyAttendeesWithEventAndUser(MyApplication.currentUser.userId)
+            adapter.setNewList(allAttendeesList)
         }
     }
 

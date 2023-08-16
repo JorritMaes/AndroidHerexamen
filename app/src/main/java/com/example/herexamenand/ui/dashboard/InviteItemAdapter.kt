@@ -5,9 +5,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
 import androidx.recyclerview.widget.RecyclerView
+import com.example.herexamenand.MyApiManager
 import com.example.herexamenand.MyApplication
 import com.example.herexamenand.R
 import com.example.herexamenand.data.entities.*
@@ -22,8 +21,10 @@ class InviteItemAdapter(private var inviteList: List<Invite>) :
     private val attendeeDao = MyApplication.database.AttendeeDao()
     private val inviteDao = MyApplication.database.InviteDao()
     private lateinit var user: User
+    private lateinit var apiManager: MyApiManager
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.invite_list_item, parent, false)
+        apiManager = MyApiManager(parent.context)
 
         return ViewHolder(view)
     }
@@ -31,7 +32,7 @@ class InviteItemAdapter(private var inviteList: List<Invite>) :
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val currentItem = inviteList[position]
         GlobalScope.launch(Dispatchers.Main){
-            user = userDao.findByName("testuser")
+            user = MyApplication.currentUser
             holder.host.text = user.username
 
         }
@@ -39,7 +40,7 @@ class InviteItemAdapter(private var inviteList: List<Invite>) :
         holder.date.text = currentItem.date
         holder.times.text = currentItem.times
         holder.acceptButton.setOnClickListener{
-            createEvent(currentItem, position)
+            acceptInvite(currentItem, position)
             inviteList = inviteList.filter { e -> currentItem.inviteId != e.inviteId }
             notifyItemRemoved(position)
         }
@@ -50,10 +51,13 @@ class InviteItemAdapter(private var inviteList: List<Invite>) :
         notifyDataSetChanged()
     }
 
-    fun createEvent(currentInvite: Invite, position: Int){
+    fun acceptInvite(currentInvite: Invite, position: Int){
         GlobalScope.launch(Dispatchers.Main){
-            val eventId = eventDao.insert(Event(0,currentInvite.date,currentInvite.times, currentInvite.name, currentInvite.userId))
-            attendeeDao.insert(Attendee(0,user.userId, eventId, Presence.CONFIRMED))
+            val attendee  = Attendee(0,user.userId, currentInvite.eventId, Presence.CONFIRMED)
+            val attendeeId = apiManager.makeApiPostAttendeeCall(attendee)
+            attendee.attendeeId
+            attendeeDao.insert(attendee)
+            apiManager.makeApiDeleteInviteCall(currentInvite)
             inviteDao.remove(currentInvite)
 
 

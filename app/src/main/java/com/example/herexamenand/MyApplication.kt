@@ -25,7 +25,7 @@ class MyApplication : Application() {
             database.UserDao().insert(User(1, "testuser"))
             database.UserDao().insert(User(2,"testuser2"))
             database.FriendsCrossRefDao().insert(FriendsCrossRef(1,2))
-            currentUser = database.UserDao().find(1L)
+            currentUser = database.UserDao().find(2L)
         }
 
         GlobalScope.launch(Dispatchers.IO) {
