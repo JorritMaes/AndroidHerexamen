@@ -29,8 +29,7 @@ class FriendItemAdapter( var friendList: List<User>, private var invitedUsersLis
         val currentItem = friendList[position]
 
         holder.friendName.text = currentItem.username
-        holder.invited.isChecked = false
-
+        holder.invited.isChecked = invitedUsersList.value?.contains(currentItem) == true
         holder.invited.setOnClickListener{
             if (holder.invited.isChecked){
                 invitedUsersList.value?.add(currentItem)

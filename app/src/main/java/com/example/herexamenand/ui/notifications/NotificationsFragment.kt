@@ -71,15 +71,18 @@ class NotificationsFragment : Fragment() {
         apiManager = MyApiManager(requireContext())
 
         selectDateButton = root.findViewById(R.id.edit_date_event_date)
+        selectDateButton.text = notificationsViewModel.eventDate.value
         selectDateButton.setOnClickListener{
             onDatePickerClick()
         }
 
         selectStartTime = root.findViewById(R.id.button_event_time_start)
+        selectStartTime.text = notificationsViewModel.startTime.value
         selectStartTime.setOnClickListener {
             onTimePickerClick(selectStartTime)
         }
         selectEndTime = root.findViewById(R.id.button_event_time_end)
+        selectEndTime.text = notificationsViewModel.endTime.value
         selectEndTime.setOnClickListener {
             onTimePickerClick(selectEndTime)
         }
@@ -218,6 +221,10 @@ class NotificationsFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        notificationsViewModel.endTime.value = selectEndTime.text.toString()
+        notificationsViewModel.startTime.value = selectStartTime.text.toString()
+        notificationsViewModel.eventDate.value = selectDateButton.text.toString()
+        notificationsViewModel.eventName.value = inputName.text.toString()
         _binding = null
     }
 

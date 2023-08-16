@@ -28,19 +28,21 @@ class HomeFragment : Fragment() {
     private lateinit var adapter: EventItemAdapter
     private lateinit var calendarView: CalendarView
     private var eventList = emptyList<AttendeeWithUserAndEvent>()
+    lateinit var homeViewModel: HomeViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val homeViewModel =
+        homeViewModel =
             ViewModelProvider(this).get(HomeViewModel::class.java)
 
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
         calendarView = root.findViewById(R.id.calendar_view)
+        calendarView.date = homeViewModel.selectedDate.value!!
 
         return root
     }
@@ -61,12 +63,10 @@ class HomeFragment : Fragment() {
         }
 
         calendarView.setOnDateChangeListener { view, year, month, dayOfMonth ->
-            GlobalScope.launch(Dispatchers.IO){
-                val tempCalendar = Calendar.getInstance()
-                tempCalendar.set(year, month, dayOfMonth)
-                view.date = tempCalendar.timeInMillis
-                setEventList(view.date)
-            }
+            val tempCalendar = Calendar.getInstance()
+            tempCalendar.set(year, month, dayOfMonth)
+            view.date = tempCalendar.timeInMillis
+            setEventList(view.date)
         }
 
 
@@ -82,6 +82,7 @@ class HomeFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        homeViewModel.selectedDate.value = calendarView.date
         _binding = null
     }
 }

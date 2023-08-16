@@ -15,4 +15,19 @@ class NotificationsViewModel : ViewModel() {
     val invitedFriends = MutableLiveData<ArrayList<User>>().apply {
         value = ArrayList<User>()
     }
+
+    val eventName = MutableLiveData<String>().apply {
+        value = " "
+    }
+
+    val startTime = MutableLiveData<String>().apply {
+        value = " "
+    }
+    val endTime = MutableLiveData<String>().apply {
+        value = " "
+    }
+    val eventDate = MutableLiveData<String>().apply {
+        value = " "
+    }
+
 }
