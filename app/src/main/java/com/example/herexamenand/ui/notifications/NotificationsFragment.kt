@@ -30,6 +30,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 
 class NotificationsFragment : Fragment() {
 
@@ -165,6 +166,7 @@ class NotificationsFragment : Fragment() {
             selectStartTime.text = ""
             selectEndTime.text = ""
             inputName.text.clear()
+            notificationsViewModel.invitedFriends.value = ArrayList()
             //clear the checkboxes by reloading
             adapter.notifyDataSetChanged()
         }
@@ -225,6 +227,7 @@ class NotificationsFragment : Fragment() {
         notificationsViewModel.startTime.value = selectStartTime.text.toString()
         notificationsViewModel.eventDate.value = selectDateButton.text.toString()
         notificationsViewModel.eventName.value = inputName.text.toString()
+        notificationsViewModel.invitedFriends.value = ArrayList()
         _binding = null
     }
 

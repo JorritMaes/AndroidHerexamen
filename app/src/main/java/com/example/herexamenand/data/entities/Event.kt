@@ -14,7 +14,7 @@ data class Event(
     var userId: Long,
     ){
     fun toJsonObject(userWithFriends: UserWithFriends): JSONObject {
-        return JSONObject( "{ \"date\":\"${this.date}\", \"name\":${this.name}, \"user\":${userWithFriends.toJsonObjectWithId()}, \"times\":\"${this.times}\" }")
+        return JSONObject( "{ \"date\":\"${this.date}\", \"name\":\"${this.name}\", \"user\":${userWithFriends.toJsonObjectWithId()}, \"times\":\"${this.times}\" }")
     }
     fun toJsonObjectWithId(userWithFriends: UserWithFriends): JSONObject {
         return JSONObject( "{ \"id\": ${this.eventId}, date\":\"${this.date}\", \"name\":${this.name}, \"user\":${userWithFriends.toJsonObjectWithId()}, \"times\":\"${this.times}\" }")

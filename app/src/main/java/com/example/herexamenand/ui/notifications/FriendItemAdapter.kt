@@ -53,8 +53,7 @@ class FriendItemAdapter( var friendList: List<User>, private var invitedUsersLis
 
     fun setNewList(newList: List<User>){
         friendList = newList
-        this.
-        notifyDataSetChanged()
+        this.notifyDataSetChanged()
     }
 
 }

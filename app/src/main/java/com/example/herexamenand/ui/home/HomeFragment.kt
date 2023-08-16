@@ -73,6 +73,20 @@ class HomeFragment : Fragment() {
         parentFragmentManager.beginTransaction().detach(this).attach(this)
     }
 
+    override fun onResume() {
+        super.onResume()
+        GlobalScope.launch(Dispatchers.IO){
+            val tempEvents = MyApplication.database.AttendeeDao().getMyAttendeesWithEventAndUser(MyApplication.currentUser.userId)
+            if(!tempEvents.equals(eventList)){
+                viewLifecycleOwner.lifecycleScope.launch{
+                    eventList = tempEvents
+                    setEventList(calendarView.date)
+                }
+            }
+        }
+
+    }
+
     private fun setEventList(date: Long) {
         viewLifecycleOwner.lifecycleScope.launch{
             val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
