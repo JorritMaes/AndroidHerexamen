@@ -2,23 +2,23 @@ package com.example.herexamenand
 
 import android.content.Context
 import com.android.volley.Request
+import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
-import com.example.herexamenand.data.entities.Attendee
-import com.example.herexamenand.data.entities.Event
-import com.example.herexamenand.data.entities.Invite
-import com.example.herexamenand.data.entities.User
+import com.example.herexamenand.data.entities.*
 import com.example.herexamenand.data.entities.relations.tables.FriendsCrossRef
 import kotlinx.coroutines.*
+import org.json.JSONArray
 import org.json.JSONObject
 
 class MyApiManager(val context: Context) {
 
-    suspend fun makeAPIGetCall(urlSuffix: String){
-        GlobalScope.launch(Dispatchers.IO) {
+    suspend fun getUser(userId: Long): User{
+        return withContext(Dispatchers.Main){
             val queue = Volley.newRequestQueue(context)
-            val url = "http://192.168.11.55:8080/${urlSuffix}"
+            val url = "http://192.168.11.55:8080/user/${userId}"
 
+            val user = CompletableDeferred<User>()
             val stringRequest = JsonObjectRequest(
                 Request.Method.GET, url, null,
                 { response ->
@@ -26,31 +26,176 @@ class MyApiManager(val context: Context) {
                     GlobalScope.launch(Dispatchers.IO) {
                         MyApplication.database.UserDao().insert(updatedUser)
                     }
+                    user.complete(updatedUser)
                 },
                 {})
 
             queue.add(stringRequest)
+            user.await()
         }
     }
 
-    suspend fun makeApiPostUserCall(user: User){
+    fun syncUsers(){
+        val queue = Volley.newRequestQueue(context)
+        val url = "http://192.168.11.55:8080/user/all"
 
-        GlobalScope.launch(Dispatchers.IO) {
-            val userWithFriends = MyApplication.database.UserDao().getFriends(user.userId)
-            val jsonObject = user.toJsonObject(userWithFriends)
+        val stringRequest = JsonArrayRequest(
+            Request.Method.GET, url, null,
+            { response ->
+                val remoteUsers = apiToUsers(response)
+                GlobalScope.launch(Dispatchers.IO) {
+                    remoteUsers.forEach { MyApplication.database.UserDao().insert(it) }
+                    val allUsersInRoom = MyApplication.database.UserDao().getAllEntities()
+                    val toBeDeletedUsers = allUsersInRoom.filter { user -> !remoteUsers.contains(user) }
+                    toBeDeletedUsers.forEach { MyApplication.database.UserDao().remove(it) }
+                }
+            },
+            {error ->
+                val t = error
+            })
+
+        queue.add(stringRequest)
+
+    }
 
 
-            var res: String = " "
-            val queue = Volley.newRequestQueue(context)
-            val url = "http://192.168.11.55:8080/create/user"
+    fun syncEvents(){
+        val queue = Volley.newRequestQueue(context)
+        val url = "http://192.168.11.55:8080/event/all"
 
-            val stringRequest = JsonObjectRequest(
-                Request.Method.POST, url, jsonObject,
-                {},
-                {})
+        val stringRequest = JsonArrayRequest(
+            Request.Method.GET, url, null,
+            { response ->
+                val remoteEvents = apiToEvents(response)
+                GlobalScope.launch(Dispatchers.IO) {
+                    remoteEvents.forEach { MyApplication.database.EventDao().insert(it) }
+                    val allEventsInRoom = MyApplication.database.EventDao().getAllEntities()
+                    val toBeDeletedEvents = allEventsInRoom.filter { event -> !remoteEvents.contains(event) }
+                    toBeDeletedEvents.forEach { MyApplication.database.EventDao().remove(it) }
+                }
+            },
+            {})
 
-            queue.add(stringRequest)
+        queue.add(stringRequest)
+
+    }
+
+    fun syncInvites(){
+        val queue = Volley.newRequestQueue(context)
+        val url = "http://192.168.11.55:8080/invite/all"
+
+        val stringRequest = JsonArrayRequest(
+            Request.Method.GET, url, null,
+            { response ->
+                val remoteInvites = apiToInvites(response)
+                GlobalScope.launch(Dispatchers.IO) {
+                    remoteInvites.forEach { MyApplication.database.InviteDao().insert(it) }
+                    val allInvitesInRoom = MyApplication.database.InviteDao().getAllEntities()
+                    val toBeDeletedInvites = allInvitesInRoom.filter { invite -> !remoteInvites.contains(invite) }
+                    toBeDeletedInvites.forEach { MyApplication.database.InviteDao().remove(it) }
+                }
+            },
+            {})
+
+        queue.add(stringRequest)
+
+    }
+
+    fun syncAttendees(){
+
+        val queue = Volley.newRequestQueue(context)
+        val url = "http://192.168.11.55:8080/attendee/all"
+
+        val deferredId = CompletableDeferred<JSONObject>()
+        val stringRequest = JsonArrayRequest(
+            Request.Method.GET, url, null,
+            { response ->
+                val remoteAttendees = apiToAttendees(response)
+                GlobalScope.launch(Dispatchers.IO) {
+                    remoteAttendees.forEach { MyApplication.database.AttendeeDao().insert(it) }
+                    val allAttendeesInRoom = MyApplication.database.AttendeeDao().getAllEntities()
+                    val toBeDeletedAttendees = allAttendeesInRoom.filter { attendee -> !remoteAttendees.contains(attendee) }
+                    toBeDeletedAttendees.forEach { MyApplication.database.AttendeeDao().remove(it) }
+                }
+            },
+            {})
+
+        queue.add(stringRequest)
+
+    }
+
+    private fun apiToUsers(response: JSONArray): List<User> {
+        val users = ArrayList<User>()
+        for (i in 0 until response.length()) {
+            users.add(apiToUser(response.getJSONObject(i).toString()))
         }
+        return users.toList()
+    }
+
+    private fun apiToEvents(response: JSONArray): List<Event> {
+        val events = ArrayList<Event>()
+        for (i in 0 until response.length()) {
+            val id = response.getJSONObject(i).getLong("id")
+            val date = response.getJSONObject(i).getString("date")
+            val times = response.getJSONObject(i).getString("times")
+            val name = response.getJSONObject(i).getString("name")
+            val userJson = response.getJSONObject(i).getJSONObject("user")
+            val userId = userJson.getLong("id")
+            events.add(Event(id,date,times,name,userId))
+        }
+        return events.toList()
+
+    }
+
+    private fun apiToInvites(response: JSONArray): List<Invite> {
+        val invites = ArrayList<Invite>()
+        for (i in 0 until response.length()) {
+            val id = response.getJSONObject(i).getLong("id")
+            val date = response.getJSONObject(i).getString("date")
+            val times = response.getJSONObject(i).getString("times")
+            val name = response.getJSONObject(i).getString("name")
+            val userJson = response.getJSONObject(i).getJSONObject("user")
+            val userId = userJson.getLong("id")
+            val eventJson = response.getJSONObject(i).getJSONObject("event")
+            val eventId = eventJson.getLong("id")
+
+            invites.add(Invite(id, date, times, name, userId, eventId))
+        }
+        return invites.toList()
+
+    }
+
+    private fun apiToAttendees(response: JSONArray): List<Attendee> {
+        val attendees = ArrayList<Attendee>()
+        for (i in 0 until response.length()) {
+            val id = response.getJSONObject(i).getLong("id")
+            val presence = response.getJSONObject(i).getString("presence")
+            val userJson = response.getJSONObject(i).getJSONObject("user")
+            val userId = userJson.getLong("id")
+            val eventJson = response.getJSONObject(i).getJSONObject("event")
+            val eventId = eventJson.getLong("id")
+
+            attendees.add(Attendee(id, userId, eventId, Presence.valueOf(presence)))
+        }
+        return attendees.toList()
+
+    }
+
+    suspend fun makeApiPostUserCall(user: User){
+        val userWithFriends = MyApplication.database.UserDao().getFriends(user.userId)
+        val jsonObject = user.toJsonObject(userWithFriends)
+
+
+        var res: String = " "
+        val queue = Volley.newRequestQueue(context)
+        val url = "http://192.168.11.55:8080/create/user"
+
+        val stringRequest = JsonObjectRequest(
+            Request.Method.POST, url, jsonObject,
+            {},
+            {})
+
+        queue.add(stringRequest)
     }
 
     private fun apiToUser(userJson: String): User {
@@ -72,8 +217,6 @@ class MyApiManager(val context: Context) {
                 }
             }
         }
-
-
 
         return User(id, username)
     }

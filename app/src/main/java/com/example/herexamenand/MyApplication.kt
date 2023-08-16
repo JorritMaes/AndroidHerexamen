@@ -19,27 +19,23 @@ class MyApplication : Application() {
             .fallbackToDestructiveMigration()
             .build()
 
-
-
         GlobalScope.launch(Dispatchers.Main){
-            database.UserDao().insert(User(1, "testuser"))
-            database.UserDao().insert(User(2,"testuser2"))
-            database.FriendsCrossRefDao().insert(FriendsCrossRef(1,2))
-            currentUser = database.UserDao().find(2L)
+            syncDatabases()
         }
 
         GlobalScope.launch(Dispatchers.IO) {
-
-            var allUsers = database.UserDao().getAllEntities()
-
             val apiManager: MyApiManager = MyApiManager(applicationContext)
-            for ( user in allUsers){
-                apiManager.makeAPIGetCall("user/${user.userId}")
-            }
-
+            currentUser = apiManager.getUser(1)
         }
+    }
 
+    private suspend fun syncDatabases() {
+        val apiManager = MyApiManager(applicationContext)
 
+        apiManager.syncUsers()
+        apiManager.syncAttendees()
+        apiManager.syncInvites()
+        apiManager.syncEvents()
 
     }
 
